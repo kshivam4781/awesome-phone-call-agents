@@ -48,7 +48,7 @@ RunStore.record_outcome()  --> logged to SQLite once resolved
 
 ## Verified live, not just in docs
 
-Every Duffel call in `duffel_client.py` was proven against Duffel's real sandbox before being written into this codebase, twice: once by hand (booking reference `LQKYWD`, LHR→JFK, rebooked from Oct 15 to Oct 16, $216.81 → $341.81), and once again reproducing the exact request/response shapes this module sends (booking reference `UUEGXU`, rebooked Oct 20 → Oct 21, $348.47), which caught a real bug before it shipped: Duffel's passenger validation rejects fictional `+1555...`-range numbers with `invalid_phone_number` — fixed by defaulting the demo script to a real-format number and documenting it loudly in `--help`.
+Every Duffel call in `duffel_client.py` was proven against Duffel's real sandbox before being written into this codebase, twice, independently: once by hand (a one-way search-rebook-confirm run with a real fare change applied) and once again reproducing the exact request/response shapes this module sends (a second, independent rebooking run against the same sandbox), which caught a real bug before it shipped: Duffel's passenger validation rejects fictional `+1555...`-range numbers with `invalid_phone_number` — fixed by defaulting the demo script to a reserved fictional number from the Ofcom drama/fiction block (`020 7946 xxxx`), which passes validation without being a real, dialable line.
 
 ## Setup
 
