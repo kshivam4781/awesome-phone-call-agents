@@ -18,7 +18,7 @@ The US flight cancellation rate reached 1.4% in 2024 (up from 1.3% the year befo
 
 ## How we built it
 
-- **Duffel** for real flight search, instant booking, and the order-change/confirm flow that actually moves a passenger to a new flight. Every one of these calls was proven against Duffel's live sandbox before being written into the codebase — twice, independently (booking references `LQKYWD` and `UUEGXU`) — which caught a real validation bug (Duffel rejects fictional `+1555...`-range phone numbers) before it could surprise us on demo day.
+- **Duffel** for real flight search, instant booking, and the order-change/confirm flow that actually moves a passenger to a new flight. Every one of these calls was proven against Duffel's live sandbox before being written into the codebase — twice, independently — which caught a real validation bug (Duffel rejects fictional `+1555...`-range phone numbers) before it could surprise us on demo day.
 - **CALL-E** (`calle-ai` Python SDK) for the actual phone call, using `calls.create_and_wait` with a closed, enum-driven `result_schema` so the call can only report one of five defined outcomes (accepted option 1/2/3, declined all, asked for a human) — never a free-text decision the rest of the system has to interpret.
 - A plain-code orchestrator that owns every decision about *whether to touch the booking* — the voice model reports what happened, the orchestrator decides what happens next, and it only ever confirms a change after a reachable call with an explicit accepted-option decision.
 
