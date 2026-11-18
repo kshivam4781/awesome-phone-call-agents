@@ -142,7 +142,7 @@ const SAMPLE_RUN = {
   booking: {
     order_id: "ord_dryrun0000000000000001",
     booking_reference: "DRYRUN",
-    passenger_phone: "+442080160509",
+    passenger_phone: "+442079460123",
     passenger_name: "Jordan Traveler",
     origin: "LHR",
     destination: "JFK",
@@ -193,6 +193,21 @@ function pill(text, kind) {
   span.textContent = text;
   return span;
 }
+// All values rendered into an innerHTML template below pass through this
+// first. Several of those values (passenger name, booking references, the
+// requested-date string) ultimately come from a CALL-E/Duffel response --
+// untrusted data from the caller's own answers or a live API, not fixed
+// strings -- so they are escaped here rather than trusted as safe markup.
+function esc(value) {
+  if (value === null || value === undefined) return "—";
+  return String(value).replace(/[&<>"']/g, (ch) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[ch]));
+}
 
 const { booking, disruption, outcome, requested_new_departure_date, mode } = run;
 
@@ -218,28 +233,28 @@ const oldDate = booking.departing_at;
 const newDate = outcome.confirmed ? outcome.new_departing_at : null;
 ticket.innerHTML = `
   <div class="route">
-    <span class="city">${booking.origin}</span>
+    <span class="city">${esc(booking.origin)}</span>
     <span class="arrow"></span>
-    <span class="city">${booking.destination}</span>
+    <span class="city">${esc(booking.destination)}</span>
   </div>
-  <div class="route-sub">${booking.passenger_name} &middot; ref <code>${booking.booking_reference}</code></div>
+  <div class="route-sub">${esc(booking.passenger_name)} &middot; ref <code>${esc(booking.booking_reference)}</code></div>
   <dl class="kv">
     <dt>Originally departing</dt>
-    <dd>${newDate ? `<span class="strike">${fmtDateTime(oldDate)}</span>` : fmtDateTime(oldDate)}</dd>
-    ${newDate ? `<dt>Now departing</dt><dd class="new-date">${fmtDateTime(newDate)}</dd>` : ""}
+    <dd>${newDate ? `<span class="strike">${esc(fmtDateTime(oldDate))}</span>` : esc(fmtDateTime(oldDate))}</dd>
+    ${newDate ? `<dt>Now departing</dt><dd class="new-date">${esc(fmtDateTime(newDate))}</dd>` : ""}
     <dt>Disruption detected</dt>
-    <dd>${fmtDateTime(disruption.detected_at)}</dd>
+    <dd>${esc(fmtDateTime(disruption.detected_at))}</dd>
     <dt>Requested new date</dt>
-    <dd>${requested_new_departure_date || "—"}</dd>
+    <dd>${esc(requested_new_departure_date || "—")}</dd>
   </dl>
   <hr class="divider">
   <dl class="kv">
     <dt>Original total</dt>
-    <dd>${fmtMoney(booking.total_amount, booking.total_currency)}</dd>
-    ${outcome.confirmed && outcome.chosen_option ? `<dt>New total</dt><dd>${fmtMoney(outcome.chosen_option.new_total_amount, outcome.chosen_option.new_total_currency)}</dd>` : ""}
-    ${outcome.confirmed && outcome.chosen_option ? `<dt>Change fee</dt><dd>${fmtMoney(outcome.chosen_option.change_fee_amount, outcome.chosen_option.change_fee_currency)}</dd>` : ""}
+    <dd>${esc(fmtMoney(booking.total_amount, booking.total_currency))}</dd>
+    ${outcome.confirmed && outcome.chosen_option ? `<dt>New total</dt><dd>${esc(fmtMoney(outcome.chosen_option.new_total_amount, outcome.chosen_option.new_total_currency))}</dd>` : ""}
+    ${outcome.confirmed && outcome.chosen_option ? `<dt>Change fee</dt><dd>${esc(fmtMoney(outcome.chosen_option.change_fee_amount, outcome.chosen_option.change_fee_currency))}</dd>` : ""}
     <dt>New booking ref</dt>
-    <dd>${outcome.new_booking_reference || "— (unchanged)"}</dd>
+    <dd>${(outcome.new_booking_reference ? esc(outcome.new_booking_reference) : "— (unchanged)")}</dd>
   </dl>
 `;
 
@@ -256,11 +271,11 @@ if (options.length === 0) {
     li.innerHTML = `
       <span class="num">${i + 1}</span>
       <span style="flex:1">
-        <div class="times">${fmtDateTime(opt.departing_at)} &rarr; ${opt.arriving_at ? fmtDateTime(opt.arriving_at) : "—"}</div>
-        <div class="fee">+${fmtMoney(opt.change_fee_amount, opt.change_fee_currency)} change fee</div>
+        <div class="times">${esc(fmtDateTime(opt.departing_at))} &rarr; ${opt.arriving_at ? esc(fmtDateTime(opt.arriving_at)) : "—"}</div>
+        <div class="fee">+${esc(fmtMoney(opt.change_fee_amount, opt.change_fee_currency))} change fee</div>
       </span>
       <span style="text-align:right">
-        <div class="price">${fmtMoney(opt.new_total_amount, opt.new_total_currency)}</div>
+        <div class="price">${esc(fmtMoney(opt.new_total_amount, opt.new_total_currency))}</div>
         ${isChosen ? '<div class="chosen-tag">Chosen</div>' : ""}
       </span>
     `;
@@ -275,7 +290,7 @@ if (outcome.transcript_summary) {
 }
 
 document.getElementById("footnote").innerHTML =
-  `Generated ${fmtDateTime(run.generated_at)} by <code>scripts/simulate_disruption.py</code>. ` +
+  `Generated ${esc(fmtDateTime(run.generated_at))} by <code>scripts/simulate_disruption.py</code>. ` +
   `This page only ever displays a result that already happened &mdash; it has no way to place a call or touch a booking itself.`;
 </script>
 </body>
