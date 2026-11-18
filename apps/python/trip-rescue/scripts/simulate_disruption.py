@@ -48,7 +48,7 @@ def main() -> None:
     parser.add_argument("--new-departure-date", default="2026-10-16")
     parser.add_argument(
         "--phone",
-        default="+442080160509",
+        default="+442079460123",
         help=(
             "E.164 phone number, in dry-run this can be anything. In live mode it goes "
             "into the Duffel passenger record (which rejects fictional 555-range US numbers "
